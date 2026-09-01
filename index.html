@@ -136,7 +136,7 @@ async function iniciarSesion() {
   const horaMinDecimal = horas + (minutos / 60);
   const horaActualStr = String(horas).padStart(2, '0') + ":" + String(minutos).padStart(2, '0');
 
-  const esHorarioValido = (horaMinDecimal >= 7.0 && horaMinDecimal <= 10.0) || (horaMinDecimal >= 17.0 && horaMinDecimal <= 22.0);
+  const esHorarioValido = (horaMinDecimal >= 7.0 && horaMinDecimal <= 12.0) || (horaMinDecimal >= 17.0 && horaMinDecimal <= 22.0);
 
   if (!esHorarioValido) {
     const mensajeAlerta = `⚠️ Envío denegado. Horario permitido: Ingresos de 07H00 a 10H00, Salidas de 17H00 a 22H00. Hora actual: ${horaActualStr}`;
@@ -299,7 +299,7 @@ function enviarFormulario() {
 
   let horaIngresoFinal = "";
   let horaSalidaFinal = "";
-  const esHorarioIngreso = (horaActualDecimal >= 7.0 && horaActualDecimal <= 10.0);
+  const esHorarioIngreso = (horaActualDecimal >= 7.0 && horaActualDecimal <= 12.0);
   const esHorarioSalida = (horaActualDecimal >= 17.0 && horaActualDecimal <= 22.0);
 
   if (!esHorarioIngreso && !esHorarioSalida) {
