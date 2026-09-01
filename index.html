@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario GPS - GitHub Pages</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #f2f4f7; }
+    .contenedor { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.10); }
+    h1 { text-align: center; margin-top: 0; color: #1f2937; }
+    .subtitulo { text-align: center; color: #6b7280; margin-bottom: 25px; line-height: 1.5; }
+    label { display: block; margin-top: 15px; margin-bottom: 6px; font-weight: bold; color: #374151; }
+    input, textarea { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; font-family: Arial, sans-serif; }
+    input:focus, textarea:focus { outline: none; border-color: #2563eb; }
+    textarea { min-height: 100px; resize: vertical; }
+    #seccionLogin { display: block; }
+    #seccionFormulario { display: none; }
+    #btnIngresar, #btnEnviar { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    #btnIngresar { background: #2563eb; color: white; }
+    #btnIngresar:hover { background: #1d4ed8; }
+    #cedula { letter-spacing: 1px; }
+    #grado[readonly], #nombres[readonly], #pais[readonly], #agregaduria[readonly], #cargo[readonly], #telefonoCelular[readonly], #correoInstitucional[readonly], #correoAgregaduria[readonly], #embajadaInstitucion[readonly] { background: #f3f4f6; color: #374151; cursor: not-allowed; }
+    #estadoCedula { margin-top: 7px; font-size: 13px; line-height: 1.4; min-height: 18px; }
+    .cedula-buscando { color: #1d4ed8; }
+    .cedula-ok { color: #15803d; }
+    .cedula-error { color: #dc2626; }
+    .ubicacion { margin-top: 20px; padding: 15px; border-radius: 10px; background: #f3f4f6; text-align: center; }
+    .ubicacion-titulo { font-weight: bold; color: #1f2937; margin-bottom: 8px; }
+    #estadoUbicacion { color: #1d4ed8; font-size: 14px; line-height: 1.5; }
+    #btnEnviar { background: #16a34a; color: white; }
+    #btnEnviar:hover:not(:disabled) { background: #15803d; }
+    #btnEnviar:disabled { background: #9ca3af; cursor: not-allowed; }
+    .estado { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; display: none; line-height: 1.4; }
+    .exito { display: block; background: #dcfce7; color: #166534; }
+    .error { display: block; background: #fee2e2; color: #991b1b; }
+    .cargando { display: block; background: #dbeafe; color: #1e40af; }
+  </style>
+</head>
+<body>
+
+<div class="contenedor">
+  <!-- SECCIÓN 1: LOGIN -->
+  <form id="seccionLogin" onsubmit="return false;">
+    <h1>🔐 Iniciar Sesión</h1>
+    <div class="subtitulo">Ingrese sus credenciales autorizadas para acceder al sistema.</div>
+    <label for="usuarioLogin">Usuario</label>
+    <input type="text" id="usuarioLogin" placeholder="Ingrese su usuario" autocomplete="off">
+    <label for="claveLogin">Contraseña</label>
+    <input type="password" id="claveLogin" placeholder="Ingrese sus credenciales" autocomplete="current-password">
+    <button type="button" id="btnIngresar" onclick="iniciarSesion()">🔑 Ingresar</button>
+    <div id="estadoLogin" class="estado"></div>
+  </form>
+
+  <!-- SECCIÓN 2: FORMULARIO GPS -->
+  <div id="seccionFormulario">
+    <h1>📍 Formulario GPS</h1>
+    <div class="subtitulo">Complete la información solicitada.<br>La ubicación se obtendrá automáticamente al enviar.</div>
+
+    <label for="cedula">Cédula</label>
+    <input type="text" id="cedula" placeholder="Ingrese su cédula" inputmode="numeric" autocomplete="off">
+    <div id="estadoCedula"></div>
+
+    <label for="grado">Grado</label>
+    <input type="text" id="grado" placeholder="Se completará automáticamente" readonly>
+
+    <label for="nombres">Nombres y apellidos</label>
+    <input type="text" id="nombres" placeholder="Se completará automáticamente" readonly>
+
+    <label for="pais">País</label>
+    <input type="text" id="pais" placeholder="Se completará automáticamente" readonly>
+
+    <label for="agregaduria">Agregaduría / Representación</label>
+    <input type="text" id="agregaduria" placeholder="Se completará automáticamente" readonly>
+
+    <label for="cargo">Cargo</label>
+    <input type="text" id="cargo" placeholder="Se completará automáticamente" readonly>
+
+    <label for="telefonoCelular">Teléfono celular</label>
+    <input type="text" id="telefonoCelular" placeholder="Se completará automáticamente" readonly>
+
+    <label for="correoInstitucional">Correo institucional</label>
+    <input type="text" id="correoInstitucional" placeholder="Se completará automáticamente" readonly>
+
+    <label for="correoAgregaduria">Correo de la agregaduría / representación policial</label>
+    <input type="text" id="correoAgregaduria" placeholder="Se completará automáticamente" readonly>
+
+    <label for="embajadaInstitucion">Embajada / representación / institución</label>
+    <input type="text" id="embajadaInstitucion" placeholder="Se completará automáticamente" readonly>
+
+    <label for="observacion">Observación</label>
+    <textarea id="observacion" placeholder="Ingrese una observación..."></textarea>
+
+    <label for="archivoRespaldo">Documento de respaldo (Foto o PDF)</label>
+    <input type="file" id="archivoRespaldo" accept="image/*,application/pdf">
+
+    <div class="ubicacion">
+      <div class="ubicacion-titulo">📍 Ubicación del dispositivo</div>
+      <div id="estadoUbicacion">La ubicación se obtendrá automáticamente al enviar el formulario.</div>
+    </div>
+
+    <button type="button" id="btnEnviar" onclick="enviarFormulario()">📤 Enviar formulario</button>
+    <div id="estado" class="estado"></div>
+  </div>
+</div>
+
+<script>
+// URL DE LA APLICACIÓN WEB DE GOOGLE APPS SCRIPT (Reemplazar con tu URL final de deploy)
+const URL_API = "https://script.google.com/macros/s/AKfycbwTAWNxZ5OSxuRZkNs81EbCh_X7ErKUXr5LRJNrnfh0G7CWFZqPHvlAIEC7YenQDBcf/exec";
+
+async function llamarApi(payload) {
+  try {
+    const response = await fetch(URL_API, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    return await response.json();
+  } catch (error) {
+    throw new Error("Error de conexión con el servidor: " + error.message);
+  }
+}
+
+async function iniciarSesion() {
+  const usuario = document.getElementById("usuarioLogin").value.trim();
+  const clave = document.getElementById("claveLogin").value.trim();
+  const btnIngresar = document.getElementById("btnIngresar");
+
+  if (!usuario || !clave) {
+    mostrarEstadoLogin("⚠️ Ingrese usuario y contraseña.", "error");
+    return;
+  }
+
+  const ahora = new Date();
+  const horas = ahora.getHours();
+  const minutos = ahora.getMinutes();
+  const horaMinDecimal = horas + (minutos / 60);
+  const horaActualStr = String(horas).padStart(2, '0') + ":" + String(minutos).padStart(2, '0');
+
+  const esHorarioValido = (horaMinDecimal >= 7.0 && horaMinDecimal <= 10.0) || (horaMinDecimal >= 17.0 && horaMinDecimal <= 22.0);
+
+  if (!esHorarioValido) {
+    const mensajeAlerta = `⚠️ Envío denegado. Horario permitido: Ingresos de 07H00 a 10H00, Salidas de 17H00 a 22H00. Hora actual: ${horaActualStr}`;
+    mostrarEstadoLogin(mensajeAlerta, "error");
+    btnIngresar.disabled = true;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          mostrarEstadoLogin(mensajeAlerta, "error");
+          await llamarApi({ accion: "notificarAccesoFueraDeHorario", usuario, horaStr: horaActualStr, lat, lon });
+          btnIngresar.disabled = false;
+        },
+        async function(error) {
+          mostrarEstadoLogin("⚠️ Envío denegado. Horario no permitido (No se pudo obtener la ubicación GPS). Hora actual: " + horaActualStr, "error");
+          await llamarApi({ accion: "notificarAccesoFueraDeHorario", usuario, horaStr: horaActualStr, lat: null, lon: null });
+          btnIngresar.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      await llamarApi({ accion: "notificarAccesoFueraDeHorario", usuario, horaStr: horaActualStr, lat: null, lon: null });
+      mostrarEstadoLogin(mensajeAlerta, "error");
+      btnIngresar.disabled = false;
+    }
+    return;
+  }
+
+  btnIngresar.disabled = true;
+  mostrarEstadoLogin("Validando credenciales...", "cargando");
+
+  try {
+    const res = await llamarApi({ accion: "verificarLogin", usuario, clave });
+    if (res && res.exito) {
+      document.getElementById("seccionLogin").style.display = "none";
+      document.getElementById("seccionFormulario").style.display = "block";
+      mostrarEstadoLogin("", "estado");
+      btnIngresar.disabled = false;
+    } else {
+      mostrarEstadoLogin(res ? res.mensaje : "Error de respuesta del servidor", "error");
+      btnIngresar.disabled = false;
+    }
+  } catch (err) {
+    mostrarEstadoLogin("❌ Error: " + err.message, "error");
+    btnIngresar.disabled = false;
+  }
+}
+
+function mostrarEstadoLogin(mensaje, tipo) {
+  const estado = document.getElementById("estadoLogin");
+  estado.textContent = mensaje;
+  estado.className = "estado " + tipo;
+}
+
+let latitud = null;
+let longitud = null;
+let precision = null;
+let cedulaValida = false;
+let temporizadorCedula = null;
+let ultimaCedulaBuscada = "";
+
+const campoCedula = document.getElementById("cedula");
+const campoGrado = document.getElementById("grado");
+const campoNombres = document.getElementById("nombres");
+const campoPais = document.getElementById("pais");
+const campoAgregaduria = document.getElementById("agregaduria");
+const campoCargo = document.getElementById("cargo");
+const campoTelefonoCelular = document.getElementById("telefonoCelular");
+const campoCorreoInstitucional = document.getElementById("correoInstitucional");
+const campoCorreoAgregaduria = document.getElementById("correoAgregaduria");
+const campoEmbajadaInstitucion = document.getElementById("embajadaInstitucion");
+const estadoCedula = document.getElementById("estadoCedula");
+const botonEnviar = document.getElementById("btnEnviar");
+
+campoCedula.addEventListener("input", function() {
+  this.value = this.value.replace(/\D/g, "");
+  cedulaValida = false;
+  ultimaCedulaBuscada = "";
+
+  campoGrado.value = "";
+  campoNombres.value = "";
+  campoPais.value = "";
+  campoAgregaduria.value = "";
+  campoCargo.value = "";
+  campoTelefonoCelular.value = "";
+  campoCorreoInstitucional.value = "";
+  campoCorreoAgregaduria.value = "";
+  campoEmbajadaInstitucion.value = "";
+
+  estadoCedula.textContent = "";
+  estadoCedula.className = "";
+
+  clearTimeout(temporizadorCedula);
+  const cedula = this.value.trim();
+  if (!cedula) return;
+
+  estadoCedula.textContent = "🔎 Buscando cédula...";
+  estadoCedula.className = "cedula-buscando";
+
+  temporizadorCedula = setTimeout(function() {
+    buscarCedulaEnServidor(cedula);
+  }, 700);
+});
+
+async function buscarCedulaEnServidor(cedula) {
+  ultimaCedulaBuscada = cedula;
+  try {
+    const respuesta = await llamarApi({ accion: "buscarCedula", cedula });
+    if (campoCedula.value.trim() !== ultimaCedulaBuscada) return;
+
+    if (respuesta && respuesta.encontrada) {
+      cedulaValida = true;
+      campoGrado.value = respuesta.grado || "";
+      campoNombres.value = respuesta.nombres || "";
+      campoPais.value = respuesta.pais || "";
+      campoAgregaduria.value = respuesta.agregaduria || "";
+      campoCargo.value = respuesta.cargo || "";
+      campoTelefonoCelular.value = respuesta.telefonoCelular || "";
+      campoCorreoInstitucional.value = respuesta.correoInstitucional || "";
+      campoCorreoAgregaduria.value = respuesta.correoAgregaduria || "";
+      campoEmbajadaInstitucion.value = respuesta.embajadaInstitucion || "";
+      estadoCedula.textContent = "✅ Persona encontrada.";
+      estadoCedula.className = "cedula-ok";
+    } else {
+      cedulaValida = false;
+      limpiarCamposPersonal();
+      estadoCedula.textContent = (respuesta && respuesta.mensaje) ? respuesta.mensaje : "⚠️ Cédula no encontrada.";
+      estadoCedula.className = "cedula-error";
+    }
+  } catch (error) {
+    cedulaValida = false;
+    limpiarCamposPersonal();
+    estadoCedula.textContent = "❌ Error al consultar la base.";
+    estadoCedula.className = "cedula-error";
+  }
+}
+
+function limpiarCamposPersonal() {
+  campoGrado.value = "";
+  campoNombres.value = "";
+  campoPais.value = "";
+  campoAgregaduria.value = "";
+  campoCargo.value = "";
+  campoTelefonoCelular.value = "";
+  campoCorreoInstitucional.value = "";
+  campoCorreoAgregaduria.value = "";
+  campoEmbajadaInstitucion.value = "";
+}
+
+function enviarFormulario() {
+  if (botonEnviar.disabled) return;
+
+  const ahoraEnvio = new Date();
+  const horasEnvio = ahoraEnvio.getHours();
+  const minutosEnvio = ahoraEnvio.getMinutes();
+  const horaActualDecimal = horasEnvio + (minutosEnvio / 60);
+  const horaActualStr = String(horasEnvio).padStart(2, '0') + ":" + String(minutosEnvio).padStart(2, '0');
+
+  let horaIngresoFinal = "";
+  let horaSalidaFinal = "";
+  const esHorarioIngreso = (horaActualDecimal >= 7.0 && horaActualDecimal <= 10.0);
+  const esHorarioSalida = (horaActualDecimal >= 17.0 && horaActualDecimal <= 22.0);
+
+  if (!esHorarioIngreso && !esHorarioSalida) {
+    mostrarEstado("⚠️ Envío denegado. Solo se permite registrar ingresos de 07H00 a 10H00, y salidas de 17H00 a 22H00. Hora actual: " + horaActualStr, "error");
+    return;
+  }
+
+  if (esHorarioIngreso) {
+    horaIngresoFinal = horaActualStr + ":" + String(ahoraEnvio.getSeconds()).padStart(2, '0');
+  } else if (esHorarioSalida) {
+    horaSalidaFinal = horaActualStr + ":" + String(ahoraEnvio.getSeconds()).padStart(2, '0');
+  }
+
+  const cedula = campoCedula.value.trim();
+  if (!cedula || !cedulaValida) {
+    mostrarEstado("⚠️ Ingrese una cédula válida que exista en la base.", "error");
+    campoCedula.focus();
+    return;
+  }
+
+  const observacion = document.getElementById("observacion").value.trim();
+  const archivoInput = document.getElementById("archivoRespaldo");
+  botonEnviar.disabled = true;
+
+  function procesarEnviosConArchivo(objetoArchivo) {
+    mostrarEstado("📍 Obteniendo ubicación del dispositivo...", "cargando");
+    mostrarEstadoUbicacion("📍 Solicitando ubicación...");
+
+    if (!navigator.geolocation) {
+      mostrarEstadoUbicacion("❌ Este navegador no permite obtener la ubicación.");
+      mostrarEstado("❌ No es posible obtener la ubicación.", "error");
+      botonEnviar.disabled = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async function(position) {
+      latitud = position.coords.latitude;
+      longitud = position.coords.longitude;
+      precision = position.coords.accuracy;
+
+      mostrarEstadoUbicacion("✅ Ubicación obtenida correctamente.");
+      mostrarEstado("📤 Enviando información...", "cargando");
+
+      const datos = {
+        grado: campoGrado.value.trim(),
+        nombres: campoNombres.value.trim(),
+        pais: campoPais.value.trim(),
+        agregaduria: campoAgregaduria.value.trim(),
+        cargo: campoCargo.value.trim(),
+        telefonoCelular: campoTelefonoCelular.value.trim(),
+        correoInstitucional: campoCorreoInstitucional.value.trim(),
+        correoAgregaduria: campoCorreoAgregaduria.value.trim(),
+        embajadaInstitucion: campoEmbajadaInstitucion.value.trim(),
+        cedula,
+        horaIngreso: horaIngresoFinal,
+        horaSalida: horaSalidaFinal,
+        observacion,
+        archivo: objetoArchivo,
+        latitud,
+        longitud,
+        precision
+      };
+
+      try {
+        const respuesta = await llamarApi({ accion: "guardarDatos", datos });
+        if (respuesta && respuesta.exito) {
+          mostrarEstado("✅ " + respuesta.mensaje, "exito");
+          campoCedula.value = "";
+          limpiarCamposPersonal();
+          document.getElementById("observacion").value = "";
+          archivoInput.value = "";
+          cedulaValida = false;
+          estadoCedula.textContent = "";
+          estadoCedula.className = "";
+          botonEnviar.disabled = false;
+          mostrarEstadoUbicacion("La ubicación se obtendrá nuevamente al próximo envío.");
+
+          setTimeout(function() {
+            document.getElementById("seccionFormulario").style.display = "none";
+            document.getElementById("seccionLogin").style.display = "block";
+            document.getElementById("usuarioLogin").value = "";
+            document.getElementById("claveLogin").value = "";
+            document.getElementById("estadoLogin").textContent = "";
+            document.getElementById("estadoLogin").className = "estado";
+            document.getElementById("btnIngresar").disabled = false;
+            document.getElementById("estado").textContent = "";
+            document.getElementById("estado").className = "estado";
+          }, 2000);
+        } else {
+          mostrarEstado("❌ " + (respuesta ? respuesta.mensaje : "Error desconocido"), "error");
+          botonEnviar.disabled = false;
+        }
+      } catch (error) {
+        mostrarEstado("❌ Error al enviar: " + error.message, "error");
+        botonEnviar.disabled = false;
+        mostrarEstadoUbicacion("⚠️ No se pudo completar el envío.");
+      }
+    }, function(error) {
+      let mensaje = "⚠️ No fue posible obtener la ubicación.";
+      if (error.code === error.PERMISSION_DENIED) mensaje = "⚠️ Debe permitir el acceso a la ubicación.";
+      mostrarEstadoUbicacion(mensaje);
+      mostrarEstado(mensaje, "error");
+      botonEnviar.disabled = false;
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+  }
+
+  if (archivoInput.files.length > 0) {
+    const file = archivoInput.files[0];
+    const reader = new FileReader();
+    mostrarEstado("📁 Leyendo documento de respaldo...", "cargando");
+
+    reader.onload = function(e) {
+      const bytes = e.target.result.split(',')[1];
+      procesarEnviosConArchivo({ nombre: file.name, tipo: file.type, bytes });
+    };
+
+    reader.onerror = function() {
+      mostrarEstado("❌ Error al leer el archivo adjunto.", "error");
+      botonEnviar.disabled = false;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    procesarEnviosConArchivo(null);
+  }
+}
+
+function mostrarEstadoUbicacion(mensaje) {
+  document.getElementById("estadoUbicacion").textContent = mensaje;
+}
+
+function mostrarEstado(mensaje, tipo) {
+  const estado = document.getElementById("estado");
+  estado.textContent = mensaje;
+  estado.className = "estado " + tipo;
+}
+</script>
+</body>
+</html>
