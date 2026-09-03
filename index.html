@@ -136,7 +136,7 @@ async function iniciarSesion() {
   const horaMinDecimal = horas + (minutos / 60);
   const horaActualStr = String(horas).padStart(2, '0') + ":" + String(minutos).padStart(2, '0');
 
-  const esHorarioValido = (horaMinDecimal >= 7.0 && horaMinDecimal <= 16.59) || (horaMinDecimal >= 17.0 && horaMinDecimal <= 23.59);
+  const esHorarioValido = (horaMinDecimal >= 0.0 && horaMinDecimal <= 16.59) || (horaMinDecimal >= 17.0 && horaMinDecimal <= 23.59);
 
   if (!esHorarioValido) {
     const mensajeAlerta = `⚠️ Envío denegado. Horario permitido: Ingresos de 07H00 a 09H00, Salidas de 17H00 a 22H00. Hora actual: ${horaActualStr}`;
@@ -299,8 +299,8 @@ function enviarFormulario() {
 
   let horaIngresoFinal = "";
   let horaSalidaFinal = "";
-  const esHorarioIngreso = (horaActualDecimal >= 7.0 && horaActualDecimal <= 16.59);
-  const esHorarioSalida = (horaActualDecimal >= 17.0 && horaActualDecimal <= 22.0);
+  const esHorarioIngreso = (horaActualDecimal >= 0.0 && horaActualDecimal <= 16.59);
+  const esHorarioSalida = (horaActualDecimal >= 17.0 && horaActualDecimal <= 23.59);
 
   if (!esHorarioIngreso && !esHorarioSalida) {
     mostrarEstado("⚠️ Envío denegado. Solo se permite registrar ingresos de 07H00 a 09H00, y salidas de 17H00 a 22H00. Hora actual: " + horaActualStr, "error");
